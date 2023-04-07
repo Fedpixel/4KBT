@@ -1,0 +1,58 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: databasedump-cronjob
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: databasedump-container
+            image: busybox
+            args:
+            - /bin/sh
+            - -c
+            - mysqldump -h 172.17.0.3 -p rootpassword -A > /mnt/databasedump/$( date +%Y%m%d ).sql
+            volumeMounts:
+            - mountPath: /mnt/databasedump
+              name: databasedump-directory          
+          volumes:
+          - name: databasedump-directory
+            persistentVolumeClaim:
+              claimName: databasedump-pvc
+          restartPolicy: OnFailure
+            
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: databasearchive-cronjob
+spec:
+  schedule: "* 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: databasearchive-container
+            image: busybox
+            args:
+            - /bin/sh
+            - -c
+            - tar cfz /mnt/databasearchive/$(date +%Y%m%d ).tgz /var/www/html/images
+            volumeMounts:
+            - mountPath: /mnt/databasearchive
+              name: databasearchive-directory
+            - mountPath: /var/www/html/images
+              name: mydata
+          volumes:
+          - name: databasearchive-directory
+            persistentVolumeClaim:
+              claimName: databasearchive-pvc
+          - name: mydata
+            persistentVolumeClaim:
+              claimName: mediawiki-pvc
+          restartPolicy: OnFailure

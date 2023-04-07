@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: meteo-pod
+spec:
+  containers:
+    - name: meteo-container
+      image: pockost/telegraf-cf-weather
+      env:
+        - name: "INFLUXDB_HOST"
+          value: "172.17.0.3"
+        - name: "INFLUXDB_PORT"
+          value: "8086"
+        - name: "INFLUXDB_NAME"
+          value: "mydatabase"
+        - name: "INFLUXDB_USER"
+          value: "influxuser"
+        - name: "INFLUXDB_PASSWORD"
+          value: "influxpassword"

@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mediawiki-ingress
+spec: 
+  rules:
+  - host: mediawiki.192.168.49.2.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mediawiki-service
+            port:
+              number: 80

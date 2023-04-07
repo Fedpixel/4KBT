@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mediawiki-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      hesias.io/application: wiki
+  template:
+    metadata:
+      labels:
+        hesias.io/application: wiki
+        hesias.io/datacenter: clermont-ferrand
+    spec:
+      containers:
+        - name: wiki-container
+          image: mediawiki
+          ports:
+            - containerPort: 80
+              name: mediawiki-http
+          env:
+            - name: MEDIAWIKI_DB_HOST
+              value: mariadb-service
+            - name: MEDIAWIKI_DB_PORT
+              value: "8080"
+            - name: MEDIAWIKI_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: username
+            - name: MEDIAWIKI_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-secret
+                  key: password
+          volumeMounts:
+          - mountPath: /var/www/html/images
+            name: mydata
+      volumes:
+      - name: mydata
+        persistentVolumeClaim:
+          claimName: mediawiki-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mediawiki-service
+spec:
+  selector:
+    hesias.io/application: wiki
+  type: LoadBalancer
+  ports:
+    - name: mediawiki-http
+      port: 80
+      targetPort: 80
+      protocol: TCP

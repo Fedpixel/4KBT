@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: grafana-pod
+  labels:
+    hesias.io/application: dashboard
+    hesias.io/datacenter: clermont-ferrand
+spec:
+  containers:
+    - name: grafana-container
+      image: grafana/grafana
+      ports:
+        - containerPort: 3000
+          name: grafana-http

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meteo-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      hesias.io/application: weather
+  template:
+    metadata:
+      labels:
+        hesias.io/application: weather
+        hesias.io/datacenter: clermont-ferrand
+    spec:
+      containers:
+        - name: meteo-container
+          image: pockost/telegraf-cf-weather
+          env:
+            - name: "INFLUXDB_HOST"
+              value: "influxdb-svc"
+            - name: "INFLUXDB_PORT"
+              value: "8086"
+            - name: "INFLUXDB_NAME"
+              value: "mydatabase"
+            - name: "INFLUXDB_USER"
+              value: "influxuser"
+            - name: "INFLUXDB_PASSWORD"
+              value: "influxpassword"
